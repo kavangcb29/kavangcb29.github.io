@@ -177,8 +177,8 @@ export const background = {
             ctx.fillText(`DST: ${Math.floor(state.frames / 5)}M`, centerX, centerY + 60);
             
             ctx.font = '700 24px Outfit, sans-serif';
-            const engTemp = 70 + (state.streak * 5) + Math.floor(plane.velocity);
-            ctx.fillText(`ENG TEMP: ${engTemp}°C`, centerX, centerY + 110);
+            const engTemp = 70 + (state.streak * 5) + Math.floor(Math.abs(plane.vy || 0) * 3);
+            ctx.fillText(`ENG TEMP: ${engTemp}°C | M ${state.telemetry.mach || '0.72'}`, centerX, centerY + 110);
             
             ctx.restore();
         }

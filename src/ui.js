@@ -135,14 +135,31 @@ const resetSettingsBtn = document.getElementById('reset-settings-btn');
 
 const uiThemeSelect = document.getElementById('ui-theme-select');
 const spaceActionSelect = document.getElementById('spacebar-action-select');
+const flightModelSelect = document.getElementById('flight-model-select');
+const hudModeSelect = document.getElementById('hud-mode-select');
+const groundEffectSlider = document.getElementById('ground-effect-slider');
+const turbulenceSlider = document.getElementById('turbulence-slider');
 const gameSpeedSlider = document.getElementById('game-speed-slider');
 const gravitySlider = document.getElementById('gravity-slider');
 const jumpSlider = document.getElementById('jump-slider');
 const gapSlider = document.getElementById('gap-slider');
+const hudToggleBtn = document.getElementById('hud-toggle-btn');
 
 function applySettingsUI() {
     uiThemeSelect.value = state.uiTheme;
     spaceActionSelect.value = state.spacebarAction;
+    if (flightModelSelect) flightModelSelect.value = state.flightModel || 'realistic';
+    if (hudModeSelect) hudModeSelect.value = state.hudMode || 'tactical';
+    if (groundEffectSlider) {
+        groundEffectSlider.value = state.groundEffectStrength;
+        const geVal = document.getElementById('ground-effect-val');
+        if (geVal) geVal.innerText = state.groundEffectStrength;
+    }
+    if (turbulenceSlider) {
+        turbulenceSlider.value = state.windTurbulence;
+        const turbVal = document.getElementById('turbulence-val');
+        if (turbVal) turbVal.innerText = state.windTurbulence;
+    }
     gameSpeedSlider.value = state.gameSpeed;
     gravitySlider.value = state.gravity;
     jumpSlider.value = state.jumpStrength;
@@ -155,6 +172,38 @@ function applySettingsUI() {
     
     if (state.uiTheme === 'light') document.body.classList.add('light-theme');
     else document.body.classList.remove('light-theme');
+}
+
+if (flightModelSelect) {
+    flightModelSelect.addEventListener('change', (e) => {
+        state.flightModel = e.target.value;
+        localStorage.setItem('flappy_flight_model', state.flightModel);
+    });
+}
+
+if (hudModeSelect) {
+    hudModeSelect.addEventListener('change', (e) => {
+        state.hudMode = e.target.value;
+        localStorage.setItem('flappy_hud_mode', state.hudMode);
+    });
+}
+
+if (groundEffectSlider) {
+    groundEffectSlider.addEventListener('input', (e) => {
+        state.groundEffectStrength = parseFloat(e.target.value);
+        const geVal = document.getElementById('ground-effect-val');
+        if (geVal) geVal.innerText = state.groundEffectStrength;
+        localStorage.setItem('flappy_ground_effect', state.groundEffectStrength);
+    });
+}
+
+if (turbulenceSlider) {
+    turbulenceSlider.addEventListener('input', (e) => {
+        state.windTurbulence = parseFloat(e.target.value);
+        const turbVal = document.getElementById('turbulence-val');
+        if (turbVal) turbVal.innerText = state.windTurbulence;
+        localStorage.setItem('flappy_turbulence', state.windTurbulence);
+    });
 }
 
 uiThemeSelect.addEventListener('change', (e) => {
@@ -195,6 +244,10 @@ gapSlider.addEventListener('input', (e) => {
 resetSettingsBtn.addEventListener('click', () => {
     localStorage.removeItem('flappy_ui_theme');
     localStorage.removeItem('flappy_space_action');
+    localStorage.removeItem('flappy_flight_model');
+    localStorage.removeItem('flappy_hud_mode');
+    localStorage.removeItem('flappy_ground_effect');
+    localStorage.removeItem('flappy_turbulence');
     localStorage.removeItem('flappy_game_speed');
     localStorage.removeItem('flappy_gravity');
     localStorage.removeItem('flappy_jump');
@@ -202,6 +255,10 @@ resetSettingsBtn.addEventListener('click', () => {
     
     state.uiTheme = 'dark';
     state.spacebarAction = 'flap';
+    state.flightModel = 'realistic';
+    state.hudMode = 'tactical';
+    state.groundEffectStrength = 1.0;
+    state.windTurbulence = 0.2;
     state.gameSpeed = 3;
     state.gravity = 0.25;
     state.jumpStrength = 4.6;
@@ -344,15 +401,48 @@ export function togglePause() {
     }
 }
 
+export function toggleHUD() {
+    if (state.hudMode === 'tactical') {
+        state.hudMode = 'minimal';
+    } else if (state.hudMode === 'minimal') {
+        state.hudMode = 'off';
+    } else {
+        state.hudMode = 'tactical';
+    }
+    localStorage.setItem('flappy_hud_mode', state.hudMode);
+    if (hudToggleBtn) {
+        hudToggleBtn.innerText = state.hudMode === 'tactical' ? 'HUD' : (state.hudMode === 'minimal' ? 'MIN' : 'OFF');
+    }
+    if (hudModeSelect) hudModeSelect.value = state.hudMode;
+    soundEffects.score();
+}
+
 // Attach UI Event Listeners
 export function initUIListeners() {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    if (hudToggleBtn) {
+        hudToggleBtn.addEventListener('click', toggleHUD);
+        hudToggleBtn.innerText = state.hudMode === 'tactical' ? 'HUD' : (state.hudMode === 'minimal' ? 'MIN' : 'OFF');
+    }
+
     window.addEventListener('keydown', (e) => {
-        if (e.code === 'ArrowUp') {
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') {
             e.preventDefault();
-            handleInput();
+            if (state.gameState === 'PLAYING') {
+                plane.pitchTrim(1);
+            } else {
+                handleInput();
+            }
+        } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+            e.preventDefault();
+            if (state.gameState === 'PLAYING') {
+                plane.pitchTrim(-1);
+            }
+        } else if (e.code === 'KeyH') {
+            e.preventDefault();
+            toggleHUD();
         } else if (e.code === 'Space') {
             e.preventDefault();
             if (state.gameState === 'PLAYING') {
@@ -364,7 +454,7 @@ export function initUIListeners() {
             } else {
                 handleInput(); // Start game on space
             }
-        } else if (e.key === 'Shift' || e.key === 'Control') {
+        } else if (e.key === 'Shift' || e.key === 'Control' || e.code === 'KeyB') {
             e.preventDefault();
             if (state.gameState === 'PLAYING') {
                 plane.shoot();
@@ -857,8 +947,5 @@ export function resetGameObjects() {
     resetFloatingTexts();
     resetProjectiles();
     resetEnemies();
-    plane.y = state.gameHeight / 2;
-    plane.velocity = 0;
-    plane.shielded = false;
-    plane.invincible = 0;
+    plane.reset();
 }

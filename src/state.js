@@ -20,6 +20,10 @@ export const state = {
     // Custom Settings
     uiTheme: localStorage.getItem('flappy_ui_theme') || 'dark',
     spacebarAction: localStorage.getItem('flappy_space_action') || 'flap',
+    flightModel: localStorage.getItem('flappy_flight_model') || 'realistic', // 'realistic' or 'arcade'
+    hudMode: localStorage.getItem('flappy_hud_mode') || 'tactical', // 'tactical', 'minimal', or 'off'
+    windTurbulence: parseFloat(localStorage.getItem('flappy_turbulence') || '0.2'),
+    groundEffectStrength: parseFloat(localStorage.getItem('flappy_ground_effect') || '1.0'),
     
     // Physics & Difficulty Modifiers
     gameSpeed: parseFloat(localStorage.getItem('flappy_game_speed') || '3'),
@@ -28,7 +32,22 @@ export const state = {
     jumpStrength: parseFloat(localStorage.getItem('flappy_jump') || '4.6'),
     pipeGap: parseInt(localStorage.getItem('flappy_pipe_gap') || '150', 10),
     
-    screenShake: 0
+    screenShake: 0,
+
+    // Real-Time Flight Dynamics Telemetry
+    telemetry: {
+        airspeedKts: 350,
+        mach: 0.72,
+        altitudeFt: 5000,
+        verticalSpeedFpm: 0,
+        gForce: 1.0,
+        aoaDeg: 3.5,
+        stalled: false,
+        groundEffect: false,
+        afterburner: false,
+        pullUpWarning: false,
+        nearMisses: 0
+    }
 };
 
 export const canvas = document.getElementById('gameCanvas');

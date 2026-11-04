@@ -2,7 +2,7 @@ import { state, ctx, getEffectiveSpeed, saveProgress } from '../state.js';
 import { soundEffects } from '../audio.js';
 import { plane } from './Plane.js';
 import { currentTheme } from '../graphics/Themes.js';
-import { createParticles } from './Particles.js';
+import { createParticles, createScrapeSparks, createShockwave } from './Particles.js';
 import { createPipeDebris } from './Debris.js';
 import { addFloatingText } from './FloatingTexts.js';
 import { unlockAchievement, gameOver, winLevel, updateScoreUI } from '../ui.js';
@@ -63,6 +63,40 @@ export const obstacles = {
                     }
                 } else {
                     gameOver();
+                }
+            }
+
+            // Aerodynamic Close-Shave & Slipstream Detection
+            if (!obs.nearMissChecked && pRight > obs.x && pLeft < obs.x + this.width) {
+                const distToTop = pTop - obs.topHeight;
+                const distToBottom = bottomPipeY - pBottom;
+                
+                // Close Shave (flying within 18px of pipe rim)
+                if ((distToTop > 0 && distToTop < 18) || (distToBottom > 0 && distToBottom < 18)) {
+                    obs.nearMissChecked = true;
+                    soundEffects.nearMiss();
+                    const sparkY = distToTop < 18 ? obs.topHeight : bottomPipeY;
+                    createScrapeSparks(plane.x, sparkY, -1, 0);
+                    state.screenShake = 4;
+                    state.streak++;
+                    state.score += 2;
+                    state.telemetry.nearMisses = (state.telemetry.nearMisses || 0) + 1;
+                    addFloatingText(plane.x + 20, sparkY, '⚡ NEAR MISS! +2', '#FFD700');
+                    updateScoreUI();
+                }
+                
+                // Perfect Slipstream Tunnel (centered high-speed punch)
+                const gapCenter = obs.topHeight + (state.pipeGap / 2);
+                const distFromCenter = Math.abs(plane.y - gapCenter);
+                if (distFromCenter < 20 && (plane.airspeed > 13 || plane.mach > 0.85)) {
+                    obs.slipstreamChecked = true;
+                    soundEffects.nearMiss();
+                    createShockwave(plane.x, gapCenter, 45, 'rgba(0, 243, 255, 0.7)');
+                    plane.thrust = 1.3;
+                    plane.afterburner = 0.7;
+                    state.score += 3;
+                    addFloatingText(plane.x + 30, plane.y - 20, '⚡ SLIPSTREAM BURST! +3', '#00f3ff');
+                    updateScoreUI();
                 }
             }
 

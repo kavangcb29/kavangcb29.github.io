@@ -130,6 +130,33 @@
             <div class="settings-list" style="max-height: 300px; overflow-y: auto; padding-right: 10px; width: 100%; text-align: left;">
                 
                 <div class="setting-item">
+                    <label>Flight Dynamics:</label>
+                    <select id="flight-model-select">
+                        <option value="realistic">✈️ Realistic Aerodynamics (Lift, AoA, Stall, Ground Effect)</option>
+                        <option value="arcade">🕹️ Classic Arcade</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label>Flight HUD:</label>
+                    <select id="hud-mode-select">
+                        <option value="tactical">🎯 Tactical Jet HUD</option>
+                        <option value="minimal">📊 Minimal</option>
+                        <option value="off">Off</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label>Ground Effect (<span id="ground-effect-val">1.0</span>)</label>
+                    <input type="range" id="ground-effect-slider" min="0" max="2" step="0.1" value="1.0">
+                </div>
+
+                <div class="setting-item">
+                    <label>Turbulence (<span id="turbulence-val">0.2</span>)</label>
+                    <input type="range" id="turbulence-slider" min="0" max="1" step="0.05" value="0.2">
+                </div>
+                
+                <div class="setting-item">
                     <label>UI Theme:</label>
                     <select id="ui-theme-select">
                         <option value="dark">Dark Theme</option>
@@ -213,6 +240,7 @@
         <button id="music-toggle-btn" class="sound-btn" title="Toggle Music" style="right: 75px;">🎵</button>
         <button id="pause-btn" class="sound-btn hidden" title="Pause (P or ESC)" style="right: 130px;">⏸️</button>
         <button id="graphics-toggle-btn" class="sound-btn" title="Switch Graphics Quality" style="right: 185px; font-size: 0.75rem; font-weight: 800; width: 44px;">4K</button>
+        <button id="hud-toggle-btn" class="sound-btn" title="Toggle Flight HUD (H)" style="right: 235px; font-size: 0.75rem; font-weight: 800; width: 44px;">HUD</button>
         <div id="crt-overlay" class="crt-overlay hidden"></div>
 
         <!-- Achievement Toast Popup -->

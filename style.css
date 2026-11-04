@@ -688,3 +688,27 @@ button:active {
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
     transform: scale(1.05);
 }
+
+/* Modern Top Control Toolbar Responsive Adjustments */
+.sound-btn {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+}
+
+.sound-btn:active {
+    transform: scale(0.92);
+}
+
+@media (max-width: 600px) {
+    .sound-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.95rem;
+        top: 65px;
+    }
+    #music-toggle-btn { right: 62px !important; }
+    #pause-btn { right: 104px !important; }
+    #graphics-toggle-btn { right: 146px !important; }
+    #hud-toggle-btn { right: 188px !important; }
+}
